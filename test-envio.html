@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Envío Formulario Seguridad</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .btn-odoo {
+            background: #714B67;
+        }
+        .btn-odoo:hover {
+            background: #5a3c52;
+        }
+        #resultado {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        h2 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Formulario de Seguridad</h1>
+        <p>Prueba los endpoints del formulario de seguridad</p>
+
+        <button onclick="testEndpointLocal()">📤 Enviar a /api/guardar-seguridad (Local)</button>
+        <button class="btn-odoo" onclick="testEndpointOdooDirecto()">🔗 Enviar Directo a Odoo</button>
+
+        <div id="resultado"></div>
+    </div>
+
+    <script>
+        // Token de ejemplo - CAMBIAR por uno válido
+        const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjIsImVtYWlsIjoiYWRtaW5AdmlhY290dXIxNi5vZG9vLmNvbSIsIm5hbWUiOiJBZG1pbmlzdHJhdG9yIiwiZXhwIjoxNzY0NjQ1OTgwLCJhdWQiOiJFdmVudG8iLCJpc3MiOiJFdmVudG8ifQ.uSB3I8HUGzhvJfCtH-fF_E7iYwuk0_sEV8VhnzSlXow";
+
+        function mostrarResultado(tipo, titulo, datos) {
+            const div = document.getElementById('resultado');
+            div.style.display = 'block';
+            div.className = tipo === 'success' ? 'success' : 'error';
+            div.innerHTML = `
+                <h3>${titulo}</h3>
+                <pre>${JSON.stringify(datos, null, 2)}</pre>
+            `;
+        }
+
+        async function testEndpointLocal() {
+            const payload = {
+                empleado_id: 4845,
+                empleado_email: "barrientosjuliethandrea@gmail.com",
+                contrato_id: 1,
+                responsable_id: 4844,
+                responsable_email: "auxiliar.sst@viacotur.com",
+                company_id: 1,
+
+                documentos: "conforme",
+                descanso: "conforme",
+                condiciones: "conforme",
+                epp: "conforme",
+                peligros: "conforme",
+                pausas: "conforme",
+                procedimientos: "conforme",
+                aspectos: "conforme",
+                conservacion: "conforme",
+
+                observaciones: "Prueba desde HTML - " + new Date().toLocaleString(),
+                token: TOKEN
+            };
+
+            try {
+                console.log("📤 Enviando a /api/guardar-seguridad...");
+                const response = await fetch("/api/guardar-seguridad", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    mostrarResultado('success', '✅ Éxito - Enviado a través de Next.js', result);
+                } else {
+                    mostrarResultado('error', '❌ Error del servidor', result);
+                }
+
+                console.log("Respuesta completa:", result);
+            } catch (error) {
+                mostrarResultado('error', '❌ Error de conexión', { error: error.message });
+                console.error(error);
+            }
+        }
+
+        async function testEndpointOdooDirecto() {
+            const payload = {
+                state: "conforme",
+                employee_id: 4845,
+                email: "barrientosjuliethandrea@gmail.com",
+                contrato_id: 1,
+                immediate_boss_id: 4844,
+                email_responsable: "auxiliar.sst@viacotur.com",
+                company_id: 1,
+
+                documentos: "conforme",
+                descanso: "conforme",
+                condiciones: "conforme",
+                epp: "conforme",
+                peligros: "conforme",
+                pausas: "conforme",
+                procedimientos: "conforme",
+                aspectos: "conforme",
+                conservacion: "conforme",
+
+                observaciones: "Prueba DIRECTA a Odoo - " + new Date().toLocaleString()
+            };
+
+            try {
+                console.log("📤 Enviando DIRECTO a Odoo...");
+                const response = await fetch("https://viacotur16-qa11-22388022.dev.odoo.com/api/ast/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${TOKEN}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    mostrarResultado('success', '✅ Éxito - Enviado DIRECTO a Odoo', result);
+                } else {
+                    mostrarResultado('error', '❌ Error de Odoo', result);
+                }
+
+                console.log("Respuesta de Odoo:", result);
+            } catch (error) {
+                mostrarResultado('error', '❌ Error de conexión con Odoo', {
+                    error: error.message,
+                    nota: "Puede ser CORS. Usa el endpoint local /api/guardar-seguridad en producción"
+                });
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
